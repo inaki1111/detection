@@ -1,0 +1,8 @@
+build/
+install/
+log/
+.colcon/
+*.pyc
+*.swp
+__pycache__/
+
