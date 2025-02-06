@@ -1,47 +1,49 @@
+import os
 import launch
 import launch_ros.actions
 from launch_ros.substitutions import FindPackageShare
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
 
 def generate_launch_description():
-    # Correct way to get the path of detection package
-    package_share = FindPackageShare("detection").find("detection")
+    # Obtener la ruta del paquete detection
+    package_share = FindPackageShare(package="detection").find("detection")
+    realsense_share = FindPackageShare(package="realsense2_camera").find("realsense2_camera")
 
-    # Path to the RealSense launch file
-    realsense_launch_path = FindPackageShare("realsense2_camera").find("realsense2_camera") + "/launch/rs_launch.py"
-
-    # Path to the RViz2 config file
-    rviz_config_path = package_share + "/config/detection.rviz2"
+    # Obtener rutas de archivos necesarios
+    realsense_launch_path = os.path.join(realsense_share, "launch", "rs_launch.py")
+    rviz_config_path = os.path.join(package_share, "config", "detection.rviz2")
 
     return launch.LaunchDescription([
-        # Include the RealSense launch file
+        # Incluir el launch file de RealSense
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(realsense_launch_path),
-            launch_arguments={
-                "enable_rgbd": "true",
-                "enable_sync": "true",
-                "align_depth.enable": "true",
-                "enable_color": "true",
-                "enable_depth": "true",
-            }.items(),
+            launch_arguments=[
+                ("enable_rgbd", "true"),
+                ("enable_sync", "true"),
+                ("align_depth.enable", "true"),
+                ("enable_color", "true"),
+                ("enable_depth", "true"),
+            ]
         ),
 
-        # Launch detect_object node
+        # Nodo para detección de objetos
         launch_ros.actions.Node(
             package="detection",
             executable="detect_object",
-            name="detect_object"
+            name="detect_object",
+            output="screen"
         ),
 
-        # Launch object_position node
+        # Nodo para calcular posición de objetos
         launch_ros.actions.Node(
             package="detection",
             executable="object_position",
-            name="object_position"
+            name="object_position",
+            output="screen"
         ),
 
-        # Launch RViz2 with the custom config file
+        # Nodo para lanzar RViz con configuración personalizada
         launch_ros.actions.Node(
             package="rviz2",
             executable="rviz2",
