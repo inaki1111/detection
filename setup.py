@@ -25,6 +25,8 @@ setup(
         'console_scripts': [
             'camera_node = detection.scripts.camera_node:main',
             'fuse_image = detection.scripts.fuse_image:main',
+            'detect_object = detection.scripts.detect_object:main',
+            'object_position = detection.scripts.object_position:main',
         ],
     },
 )
